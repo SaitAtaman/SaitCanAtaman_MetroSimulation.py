@@ -39,12 +39,14 @@ class MetroAgi:
         if hedef_id not in self.istasyonlar:
             print(f"Hata: Hedef istasyonu '{hedef_id}' bulunamadı.")
             return None
-      
-        # BFS için kuyruk oluştur
-        baslangic_istasyon = self.istasyonlar[baslangic_id]
-        kuyruk = deque([(baslangic_istasyon, [baslangic_istasyon])])  # (mevcut_istasyon, rota)
+            
+        baslangic = self.istasyonlar[baslangic_id]
+        hedef = self.istasyonlar[hedef_id]
+        
+         # BFS için kuyruk oluştur
+        kuyruk = deque([(baslangic, [baslangic])])  # (mevcut_istasyon, rota)
         ziyaret_edildi = set()  # Ziyaret edilen istasyonları takip etmek için
-        ziyaret_edildi.add(baslangic_istasyon)  # Başlangıç istasyonunu ziyaret edildi olarak işaretle
+        ziyaret_edildi.add(baslangic)  # Başlangıç istasyonunu ziyaret edildi olarak işaretle
 
         while kuyruk:
             mevcut_istasyon, rota = kuyruk.popleft()
@@ -69,18 +71,12 @@ class MetroAgi:
             return None
         if hedef_id not in self.istasyonlar:
             print(f"Hata: Hedef istasyonu '{hedef_id}' bulunamadı.")
-            return None
-
-            
-        baslangic = self.istasyonlar[baslangic_id]
-        hedef = self.istasyonlar[hedef_id]
-        ziyaret_edildi = {baslangic}        
-
+            return None     
         
         # A* algoritması için öncelik kuyruğu oluştur
-        baslangic_istasyon = self.istasyonlar[baslangic_id]
-        hedef_istasyon = self.istasyonlar[hedef_id]
-        pq = [(0, id(baslangic_istasyon), baslangic_istasyon, [baslangic_istasyon], 0)]  # (toplam_tahmini_sure, id, mevcut_istasyon, rota, toplam_sure)
+        baslangic = self.istasyonlar[baslangic_id]
+        hedef = self.istasyonlar[hedef_id]
+        pq = [(0, id(baslangic), baslangic, [baslangic], 0)]  # (toplam_tahmini_sure, id, mevcut_istasyon, rota, toplam_sure)
         ziyaret_edildi = set()  # Ziyaret edilen istasyonları takip etmek için
 
         while pq:
@@ -108,12 +104,6 @@ class MetroAgi:
         # Rota bulunamazsa None döndür
         return None
         
-        if baslangic_id not in self.istasyonlar or hedef_id not in self.istasyonlar:
-            return None
-
-        baslangic = self.istasyonlar[baslangic_id]
-        hedef = self.istasyonlar[hedef_id]
-        ziyaret_edildi = set()
 
 # Örnek Kullanım
 if __name__ == "__main__":
