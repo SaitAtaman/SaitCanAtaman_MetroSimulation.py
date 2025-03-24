@@ -29,18 +29,7 @@ Kullanıcıların başlangıç ve varış istasyonlarını girerek optimal rotal
 - **Neden Kullandık?**  
   Seyahat süresini minimize etmek için en etkili yöntemdir.
 
-## 📊 Örnek Kullanım ve Test Sonuçları
-
-```python
-# Örnek 1: AŞTİ → OSB
-rota = metro.en_az_aktarma_bul("M1", "K4")
-# Çıktı: AŞTİ → Kızılay → Kızılay → Ulus → Demetevler → OSB
-
-# Örnek 2: Batıkent → Keçiören
-sonuc = metro.en_hizli_rota_bul("T1", "T4")
-# Çıktı: (21 dakika) Batıkent → Demetevler → Gar → Keçiören
-
-#### 🚇 🚀 Projeyi Geliştirme Fikirleri
+  #### 🚇 🚀 ***Projeyi Geliştirme Fikirleri***
 
     Gerçek Zamanlı Veri Entegrasyonu
 
@@ -65,3 +54,16 @@ sonuc = metro.en_hizli_rota_bul("T1", "T4")
         İstasyon verilerini CSV/JSON'dan okuma
 
         SQLite veritabanı entegrasyonu
+
+
+## 📊 Örnek Kullanım ve Test Sonuçları
+
+```python
+# Örnek 1: AŞTİ → OSB
+rota = metro.en_az_aktarma_bul("M1", "K4")
+# Çıktı: AŞTİ → Kızılay → Kızılay → Ulus → Demetevler → OSB
+
+# Örnek 2: Batıkent → Keçiören
+sonuc = metro.en_hizli_rota_bul("T1", "T4")
+# Çıktı: (21 dakika) Batıkent → Demetevler → Gar → Keçiören
+
