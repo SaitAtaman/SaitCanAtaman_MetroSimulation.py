@@ -7,10 +7,10 @@ class Istasyon:
         self.idx = idx
         self.ad = ad
         self.hat = hat
-        self.komsular: List[Tuple['Istasyon', int]] = []  # (istasyon, süre) tuple'ları
+        self.komsular: Dict['Istasyon', int] = {}  # {istasyon: süre} dictionary
 
     def komsu_ekle(self, istasyon: 'Istasyon', sure: int):
-        self.komsular.append((istasyon, sure))
+        self.komsular[istasyon] = sure
 
 class MetroAgi:
     def __init__(self):
@@ -18,7 +18,7 @@ class MetroAgi:
         self.hatlar: Dict[str, List[Istasyon]] = defaultdict(list)
 
     def istasyon_ekle(self, idx: str, ad: str, hat: str) -> None:
-        if id not in self.istasyonlar:
+        if idx not in self.istasyonlar:
             istasyon = Istasyon(idx, ad, hat)
             self.istasyonlar[idx] = istasyon
             self.hatlar[hat].append(istasyon)
@@ -30,8 +30,7 @@ class MetroAgi:
         istasyon2.komsu_ekle(istasyon1, sure)
     
     def en_az_aktarma_bul(self, baslangic_id: str, hedef_id: str) -> Optional[List[Istasyon]]:
-        """BFS algoritması kullanarak en az aktarmalı rotayı bulur
-   
+        """BFS algoritması kullanarak en az aktarmalı rotayı bulur"""
         # Başlangıç ve hedef istasyonların varlığını kontrol et
         if baslangic_id not in self.istasyonlar:
             print(f"Hata: Başlangıç istasyonu '{baslangic_id}' bulunamadı.")
@@ -43,7 +42,7 @@ class MetroAgi:
         baslangic = self.istasyonlar[baslangic_id]
         hedef = self.istasyonlar[hedef_id]
         
-         # BFS için kuyruk oluştur
+        # BFS için kuyruk oluştur
         kuyruk = deque([(baslangic, [baslangic])])  # (mevcut_istasyon, rota)
         ziyaret_edildi = set()  # Ziyaret edilen istasyonları takip etmek için
         ziyaret_edildi.add(baslangic)  # Başlangıç istasyonunu ziyaret edildi olarak işaretle
@@ -55,7 +54,7 @@ class MetroAgi:
             if mevcut_istasyon.idx == hedef_id:
                 return rota
                 
-         # Mevcut istasyonun komşularını dolaş
+            # Mevcut istasyonun komşularını dolaş
             for komsu in mevcut_istasyon.komsular:
                 if komsu not in ziyaret_edildi:
                     ziyaret_edildi.add(komsu)  # Komşuyu ziyaret edildi olarak işaretle
@@ -64,8 +63,8 @@ class MetroAgi:
         # Rota bulunamazsa None döndür
         return None
  
-     def en_hizli_rota_bul(self, baslangic_id: str, hedef_id: str) -> Optional[Tuple[List[Istasyon], int]]:
-       # Başlangıç ve hedef istasyonların varlığını kontrol et
+    def en_hizli_rota_bul(self, baslangic_id: str, hedef_id: str) -> Optional[Tuple[List[Istasyon], int]]:
+        # Başlangıç ve hedef istasyonların varlığını kontrol et
         if baslangic_id not in self.istasyonlar:
             print(f"Hata: Başlangıç istasyonu '{baslangic_id}' bulunamadı.")
             return None
@@ -73,14 +72,16 @@ class MetroAgi:
             print(f"Hata: Hedef istasyonu '{hedef_id}' bulunamadı.")
             return None     
         
-        # A* algoritması için öncelik kuyruğu oluştur
+        # Dijkstra algoritması için öncelik kuyruğu oluştur
         baslangic = self.istasyonlar[baslangic_id]
         hedef = self.istasyonlar[hedef_id]
-        pq = [(0, id(baslangic), baslangic, [baslangic], 0)]  # (toplam_tahmini_sure, id, mevcut_istasyon, rota, toplam_sure)
+        pq = [(0, id(baslangic), baslangic, [baslangic])]  # (toplam_sure, id, istasyon, rota)
+        
         ziyaret_edildi = set()  # Ziyaret edilen istasyonları takip etmek için
+        sureler = {baslangic: 0}  # Her istasyona ulaşmanın en kısa süresi
 
         while pq:
-            tahmini_sure, _, mevcut_istasyon, rota, toplam_sure = heapq.heappop(pq)
+            toplam_sure, _, mevcut_istasyon, rota = heapq.heappop(pq)
 
             # Hedef istasyona ulaşıldıysa rotayı ve toplam süreyi döndür
             if mevcut_istasyon.idx == hedef_id:
@@ -91,19 +92,17 @@ class MetroAgi:
                 continue
             ziyaret_edildi.add(mevcut_istasyon)
 
-            # Komşu istasyonları dolaş
+               # Komşu istasyonları dolaş
             for komsu, sure in mevcut_istasyon.komsular.items():
                 if komsu not in ziyaret_edildi:
-                    # Yeni toplam süreyi hesapla
-                    yeni_toplam_sure = toplam_sure + sure
-                    # Tahmini süreyi hesapla (heuristic: basitçe 0 kullanıyoruz, çünkü metro ağında mesafe bilgisi yok)
-                    yeni_tahmini_sure = yeni_toplam_sure  # Heuristic: 0 (en iyi durum)
-                    # Yeni rotayı ve süreyi kuyruğa ekle
-                    heapq.heappush(pq, (yeni_tahmini_sure, id(komsu), komsu, rota + [komsu], yeni_toplam_sure))
+                     yeni_toplam_sure = toplam_sure + sure
+                if komsu not in sureler or yeni_toplam_sure < sureler[komsu]:
+                        sureler[komsu] = yeni_toplam_sure
+                        heapq.heappush(pq, (yeni_toplam_sure, id(komsu), komsu, rota + [komsu])) 
+
 
         # Rota bulunamazsa None döndür
         return None
-        
 
 # Örnek Kullanım
 if __name__ == "__main__":
@@ -156,31 +155,31 @@ if __name__ == "__main__":
     print("\n1. AŞTİ'den OSB'ye:")
     rota = metro.en_az_aktarma_bul("M1", "K4")
     if rota:
-        print("En az aktarmalı rota:", " -> ".join(i.ad for i in rota))
+        print("En az aktarmalı rota:", " → ".join(i.ad for i in rota))
     
     sonuc = metro.en_hizli_rota_bul("M1", "K4")
     if sonuc:
         rota, sure = sonuc
-        print(f"En hızlı rota ({sure} dakika):", " -> ".join(i.ad for i in rota))
+        print(f"En hızlı rota ({sure} dakika):", " → ".join(i.ad for i in rota))
     
     # Senaryo 2: Batıkent'ten Keçiören'e
     print("\n2. Batıkent'ten Keçiören'e:")
     rota = metro.en_az_aktarma_bul("T1", "T4")
     if rota:
-        print("En az aktarmalı rota:", " -> ".join(i.ad for i in rota))
+        print("En az aktarmalı rota:", " → ".join(i.ad for i in rota))
     
     sonuc = metro.en_hizli_rota_bul("T1", "T4")
     if sonuc:
         rota, sure = sonuc
-        print(f"En hızlı rota ({sure} dakika):", " -> ".join(i.ad for i in rota))
+        print(f"En hızlı rota ({sure} dakika):", " → ".join(i.ad for i in rota))
     
     # Senaryo 3: Keçiören'den AŞTİ'ye
     print("\n3. Keçiören'den AŞTİ'ye:")
     rota = metro.en_az_aktarma_bul("T4", "M1")
     if rota:
-        print("En az aktarmalı rota:", " -> ".join(i.ad for i in rota))
+        print("En az aktarmalı rota:", " → ".join(i.ad for i in rota))
     
     sonuc = metro.en_hizli_rota_bul("T4", "M1")
     if sonuc:
         rota, sure = sonuc
-        print(f"En hızlı rota ({sure} dakika):", " -> ".join(i.ad for i in rota)) 
+        print(f"En hızlı rota ({sure} dakika):", " → ".join(i.ad for i in rota))
